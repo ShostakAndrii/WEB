@@ -18,6 +18,11 @@ const restaurants = document.querySelector(".restaurants");
 const menu = document.querySelector(".menu");
 const logo = document.querySelector(".logo");
 const cardsMenu = document.querySelector(".cards-menu");
+const restaurantTitle = document.querySelector("section.menu > div.section-heading > h2.section-title");
+const restaurantRating = document.querySelector(".rating");
+const restaurantPrice = document.querySelector(".price");
+const restaurantCategory = document.querySelector(".category");
+const inputSearch = document.querySelector(".input-search");
 
 let login = localStorage.getItem("login");
 
@@ -28,7 +33,7 @@ const getData = async function(url) {
     throw new Error(`Ошибка по адресу ${url}, статус ошибки ${response.status}!`);
   }
 
-  return await response.json();
+  return response.json();
 };
 
 getData("./db/partners.json");
@@ -117,49 +122,43 @@ function checkAuth() {
   }
 }
 
-function createCardRestaurant(restaurant) {
-  const {
-    image,
-    kitchen,
-    name,
-    price,
-    stars,
-    products,
-    time_of_delivery: timeOfDelivery
-  } = restaurant;
+function createCardRestaurant({ image, kitchen, name, price, stars, products, time_of_delivery: timeOfDelivery }) {
+
+  const cardRestaurant = document.createElement("a");
+  cardRestaurant.className = "card card-restaurant wow animate__animated animate__pulse";
+  cardRestaurant.products = products;
+  cardRestaurant.info = { kitchen, name, price, stars };
 
   const card = `
-    <a class="card card-restaurant wow animate__animated animate__pulse" data-wow-delay="0.2s" data-products="${products}">
-      <img src="${image}" alt="Image" class="card-image">
-      <div class="card-text">
-        <div class="card-heading">
-          <h3 class="card-title">${name}</h3>
-          <span class="card-tag tag">${timeOfDelivery}</span>
-        </div>
-        <div class="card-info">
-          <div class="rating">
-            <img src="img/icon/rating.svg" class="rating-star">
-            ${stars}
-          </div>
-          <div class="price">От ${price} ₽</div>
-          <div class="category">${kitchen}</div>
-        </div>
+    <img src=${image} alt=${name} class="card-image">
+    <div class="card-text">
+      <div class="card-heading">
+        <h3 class="card-title">${name}</h3>
+        <span class="card-tag tag">${timeOfDelivery}</span>
       </div>
-    </a>
+      <div class="card-info">
+        <div class="rating">
+          <img src="img/icon/rating.svg" class="rating-star">
+          ${stars}
+        </div>
+        <div class="price">От ${price} ₽</div>
+        <div class="category">${kitchen}</div>
+      </div>
+    </div>
   `;
 
-  cardsRestaurants.insertAdjacentHTML('beforeend', card);
+  cardRestaurant.insertAdjacentHTML("beforeend", card);
+  cardsRestaurants.insertAdjacentElement('beforeend', cardRestaurant);
 
 }
 
-function createCardGood(goods) {
-  const { description, image, id, name, price } = goods;
+function createCardGood({ description, image, id, name, price }) {
 
   const card = document.createElement("div");
   card.className = "card wow animate__animated animate__pulse";
 
   card.insertAdjacentHTML("beforeend", `
-    <img src="${image}" alt="Image" class="card-image">
+    <img src=${image} alt=${name} class="card-image">
     <div class="card-text">
       <div class="card-heading">
         <h3 class="card-title card-title-reg">${name}</h3>
@@ -177,7 +176,7 @@ function createCardGood(goods) {
     </div>
   `);
 
-  cardsMenu.insertAdjacentElement("beforeend", card)
+  cardsMenu.insertAdjacentElement("beforeend", card);
 }
 
 function openGoods(event) {
@@ -187,15 +186,21 @@ function openGoods(event) {
     const restaurant = target.closest(".card-restaurant");
 
     if (restaurant) {
+      cardsMenu.textContent = "";
       containerPromo.classList.add("hide");
       restaurants.classList.add("hide");
       menu.classList.remove("hide");
 
-      cardsMenu.textContent = "";
+      const { name, kitchen, price, stars } = restaurant.info;
 
-      getData("./db/${restaurant.dataset.products}").then(function(data) {
+      restaurantTitle.textContent = name;
+      restaurantRating.textContent = stars;
+      restaurantPrice.textContent = `От ${price} ₽`;
+      restaurantCategory.textContent = kitchen;
+
+      getData(`./db/${restaurant.products}`).then(function(data) {
         data.forEach(createCardGood);
-      });
+      })
     }
   } else {
     toggleModalAuth();
@@ -207,6 +212,11 @@ function init() {
     data.forEach(createCardRestaurant);
   });
 
+  buttonAuth.addEventListener("click", clearForm);
+
+  cartButton.addEventListener("click", toggleModal);
+  close.addEventListener("click", toggleModal);
+
   cardsRestaurants.addEventListener("click", openGoods);
   logo.addEventListener("click", function() {
     containerPromo.classList.remove("hide");
@@ -214,22 +224,62 @@ function init() {
     menu.classList.add("hide");
   })
 
-  cartButton.addEventListener("click", toggleModal);
-  close.addEventListener("click", toggleModal);
-
-  buttonAuth.addEventListener("click", clearForm);
-
   checkAuth();
 
-  createCardRestaurant();
+  inputSearch.addEventListener("keypress", function(event) {
+    if (event.charCode === 13) {
+      const value = event.target.value.trim();
 
-  // Slider
+      if (!value) {
+        event.target.style.borderColor = "#ff0000";
+        event.target.value = "";
+        setTimeout(function() {
+          event.target.style.borderColor = "";
+        }, 1500);
+        return;
+      }
 
-  new Swiper(".swiper-container", {
-    slidePerView: 1,
-    loop: true,
-    autoplay: true,
+      getData("./db/partners.json")
+      .then(function (data) {
+        return data.map(function(partner) {
+          return partner.products;
+        })
+      })
+      .then(function (linksProduct) {
+        cardsMenu.textContent = "";
+
+        linksProduct.forEach(function(link) {
+          getData(`./db/${link}`)
+          .then(function(data) {
+
+            const resultSearch = data.filter(function(item) {
+              const name = item.name.toLowerCase();
+              return name.includes(value.toLowerCase());
+            })
+
+            containerPromo.classList.add("hide");
+            restaurants.classList.add("hide");
+            menu.classList.remove("hide");
+
+            restaurantTitle.textContent = "Результат поиска";
+            restaurantRating.textContent = "";
+            restaurantPrice.textContent = "";
+            restaurantCategory.textContent = "";
+            resultSearch.forEach(createCardGood);
+          })
+        })
+      })
+    }
   })
 }
 
 init();
+
+
+// Slider
+
+new Swiper(".swiper-container", {
+  slidePerView: 1,
+  loop: true,
+  autoplay: true,
+})
