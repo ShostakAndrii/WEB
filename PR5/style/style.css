@@ -77,7 +77,7 @@ label span {
     font-size: 2rem !important;
     color: #3CB371;
     -webkit-text-stroke-width: 2px;
-    -webkit-text-stroke-color: black; 
+    -webkit-text-stroke-color: black;
 }
 
 .btn-outline-danger:hover,
@@ -94,5 +94,5 @@ label span {
 .btn-outline-danger:visited span{
     color: #E0FFFF !important;
     -webkit-text-stroke-width: 2px;
-    -webkit-text-stroke-color: black; 
+    -webkit-text-stroke-color: black;
 }
