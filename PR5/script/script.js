@@ -8,91 +8,40 @@ document.addEventListener("DOMContentLoaded", function() {
   const prevButton = document.querySelector("#prev");
   const sendButton = document.querySelector("#send");
 
-  const questions = [
-      {
-          question: "Какого цвета бургер?",
-          answers: [
-              {
-                  title: 'Стандарт',
-                  url: './image/burger.png'
-              },
-              {
-                  title: 'Черный',
-                  url: './image/burgerBlack.png'
-              }
-          ],
-          type: 'radio'
-      },
-      {
-          question: "Из какого мяса котлета?",
-          answers: [
-              {
-                  title: 'Курица',
-                  url: './image/chickenMeat.png'
-              },
-              {
-                  title: 'Говядина',
-                  url: './image/beefMeat.png'
-              },
-              {
-                  title: 'Свинина',
-                  url: './image/porkMeat.png'
-              }
-          ],
-          type: 'radio'
-      },
-      {
-          question: "Дополнительные ингредиенты?",
-          answers: [
-              {
-                  title: 'Помидор',
-                  url: './image/tomato.png'
-              },
-              {
-                  title: 'Огурец',
-                  url: './image/cucumber.png'
-              },
-              {
-                  title: 'Салат',
-                  url: './image/salad.png'
-              },
-              {
-                  title: 'Лук',
-                  url: './image/onion.png'
-              }
-          ],
-          type: 'checkbox'
-      },
-      {
-          question: "Добавить соус?",
-          answers: [
-              {
-                  title: 'Чесночный',
-                  url: './image/sauce1.png'
-              },
-              {
-                  title: 'Томатный',
-                  url: './image/sauce2.png'
-              },
-              {
-                  title: 'Горчичный',
-                  url: './image/sauce3.png'
-              }
-          ],
-          type: 'radio'
-      }
-  ];
+  const firebaseConfig = {
+    apiKey: "AIzaSyBDpCfQixdMwlynqBEDfasU-uufjYjPFR4",
+    authDomain: "webpr-f260c.firebaseapp.com",
+    databaseURL: "https://webpr-f260c-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "webpr-f260c",
+    storageBucket: "webpr-f260c.appspot.com",
+    messagingSenderId: "619579801013",
+    appId: "1:619579801013:web:ce1eeacb39f93438b4adfc",
+    measurementId: "G-PBP2YWW548"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+
+  const getData = () => {
+    formAnswers.textContent = "LOAD";
+
+    nextButton.classList.add("d-none");
+    prevButton.classList.add("d-none");
+    
+    firebase.database().ref().child("questions").once("value")
+    .then(snap => playTest(snap.val()));
+  }
 
   btnOpenModal.addEventListener("click", () => {
     modalBlock.classList.add("d-block");
-    playTest();
+    getData();
   })
 
   closeModal.addEventListener("click", () => {
     modalBlock.classList.remove("d-block");
   })
 
-  const playTest = () => {
+  const playTest = (questions) => {
     const finalAnswers = [];
     let numberQuestion = 0;
 
@@ -212,6 +161,11 @@ document.addEventListener("DOMContentLoaded", function() {
       checkAnswer();
       numberQuestion++;
       renderQuestions(numberQuestion);
+      firebase
+      .database()
+      .ref()
+      .child("contacts")
+      .push(finalAnswers)
     }
   }
 })
