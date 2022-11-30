@@ -26,6 +26,7 @@ const inputSearch = document.querySelector(".input-search");
 const modalBody = document.querySelector(".modal-body");
 const modalPrice = document.querySelector(".modal-pricetag");
 const buttonClearCart = document.querySelector(".clear-cart");
+const modalMakeOrderButton = document.querySelector(".make-order");
 
 let login = localStorage.getItem("login");
 
@@ -316,6 +317,28 @@ function init() {
     restaurants.classList.remove("hide");
     menu.classList.add("hide");
   })
+
+  modalMakeOrderButton.addEventListener("click", function(event) {
+    const items = { ...localStorage };
+    let count_of_orders = 1;
+    let order = {}
+
+    for (const item in items) {
+      if (item.startsWith('Order_')) {
+        count_of_orders += 1;
+      } else if (item.startsWith("login")) {
+        order.user = items[item];
+      }
+    }
+
+    order.cart = cart
+
+    localStorage.setItem(`Order_${count_of_orders}`, JSON.stringify(order));
+
+    cart.length = 0;
+    renderCart();
+    toggleModal();
+  });
 
   checkAuth();
 
