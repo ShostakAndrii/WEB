@@ -37,16 +37,32 @@ const enemy = {
   renderProgressbarHP: renderProgressbarHP,
 }
 
-function init() {
+const init = () => {
+  let clickCount = 6;
+
+  $btn.innerText = `Thunder Jolt (${clickCount-1})`;
+  $btn1.innerText = `Thunder Jolt (${clickCount-1})`;
+
+  const clickCounter1 = clickCounterFunc(clickCount);
+  const clickCounter2 = clickCounterFunc(clickCount);
+
   $btn.addEventListener("click", function() {
-    console.log("Kick");
-    character.changeHP(random(20));
-    enemy.changeHP(random(20));
+    clicksLeft1 = clickCounter1();
+    if (clicksLeft1 > 0) {
+      console.log("Kick");
+      character.changeHP(random(20));
+      enemy.changeHP(random(20));
+      $btn.innerText = `Thunder Jolt (${clicksLeft1-1})`;
+    }
   });
 
   $btn1.addEventListener("click", function() {
-    console.log("Kick");
-    enemy.changeHP1(random(20));
+    clicksLeft2 = clickCounter2();
+    if (clicksLeft2 > 0) {
+      console.log("Kick");
+      enemy.changeHP1(random(20));
+      $btn1.innerText = `Thunder Jolt (${clicksLeft2-1})`;
+    }
   });
 
   console.log("Start Game!");
@@ -94,6 +110,8 @@ function changeHP(count) {
 }
 
 function changeHP1(count) {
+  this.hp.current -= count;
+
   if (this.hp.current <= 0) {
     this.hp.current = 0;
     alert("Бедный " + this.name + " проиграл бой!");
@@ -104,11 +122,11 @@ function changeHP1(count) {
   this.renderHP();
 }
 
-function random(num) {
+const random = (num) => {
   return Math.ceil(Math.random() * num);
-}
+};
 
-function generateLog(firstPerson, secondPerson, count) {
+const generateLog = (firstPerson, secondPerson, count) => {
   const logs = [
       `${firstPerson.name} вспомнил что-то важное, но неожиданно ${secondPerson.name}, не помня себя от испуга, ударил в предплечье врага. -${count}, [${firstPerson.hp.current}/${firstPerson.hp.total}]`,
       `${firstPerson.name} поперхнулся, и за это ${secondPerson.name} с испугу приложил прямой удар коленом в лоб врага. -${count}, [${firstPerson.hp.current}/${firstPerson.hp.total}]`,
@@ -123,6 +141,13 @@ function generateLog(firstPerson, secondPerson, count) {
   ];
 
   return logs[random(logs.length) - 1];
-}
+};
+
+const clickCounterFunc = (leftClicks) => {
+  return function () {
+    leftClicks -= 1;
+    return leftClicks;
+  };
+};
 
 init();
