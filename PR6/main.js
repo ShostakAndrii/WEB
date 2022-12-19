@@ -1,4 +1,5 @@
 import Pokemon from "./pokemon.js";
+import pokemons from "./pokemons.js"
 import random from "./utils.js";
 
 const player1 = new Pokemon({
@@ -19,6 +20,12 @@ const player2 = new Pokemon({
 
 const $btn = document.getElementById("btn-kick");
 const $btn1 = document.getElementById("btn-kick1");
+
+const $img = document.getElementById("img-player1");
+const $img1 = document.getElementById("img-player2");
+
+$img.src = pokemons[1].img;
+$img1.src = pokemons[0].img;
 
 const clickCount = 6;
 // const character = {
@@ -62,8 +69,12 @@ const init = () => {
   $btn.innerText = `Thunder Jolt (${clickCount-1})`;
   $btn1.innerText = `Thunder Jolt (${clickCount-1})`;
 
+  const clickCounter1 = clickCounterFunc(clickCount);
+  const clickCounter2 = clickCounterFunc(clickCount);
+
   $btn.addEventListener("click", function() {
-    if (clickCounter1() > 0) {
+    clicksLeft1 = clickCounter1();
+    if (clicksLeft1 > 0) {
       player1.changeHP(random(60, 20), function(count) {
         console.log("Some change after change HP", count);
         console.log(generateLog(player1, player2, count));
@@ -76,7 +87,8 @@ const init = () => {
   });
 
   $btn1.addEventListener("click", function() {
-    if (clickCounter2() > 0) {
+    clicksLeft2 = clickCounter2();
+    if (clicksLeft2 > 0) {
       player2.changeHP(random(60, 20));
       // enemy.changeHP1(random(20));
       $btn1.innerText = `Thunder Jolt (${clicksLeft2-1})`;
@@ -167,8 +179,5 @@ const clickCounterFunc = (leftClicks) => {
     return leftClicks;
   };
 };
-
-const clickCounter1 = clickCounterFunc(clickCount);
-const clickCounter2 = clickCounterFunc(clickCount);
 
 init();
